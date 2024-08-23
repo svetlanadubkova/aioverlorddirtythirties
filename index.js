@@ -64,25 +64,57 @@ app.post('/chat', async (req, res) => {
 function getResponseFromDatabase(userMessage) {
     const lowercaseMessage = userMessage.toLowerCase();
     
-    // Specific responses for certain questions
-    if (lowercaseMessage.includes('bring a plus one')) {
+    // Plus one
+    if (lowercaseMessage.includes('plus one') || lowercaseMessage.includes('bring someone')) {
         return dirtythirtiesDatabase.plusOneResponse;
     }
 
-    if (lowercaseMessage.includes('where is the party')) {
+    // Party location
+    if (lowercaseMessage.includes('where') && lowercaseMessage.includes('party')) {
         return dirtythirtiesDatabase.partyLocationResponse;
     }
 
+    // Speed dating
     if (lowercaseMessage.includes('speed dating')) {
         return dirtythirtiesDatabase.speedDatingResponse;
     }
 
-    // Check for event details
+    // Event time
     if (lowercaseMessage.includes('when') || lowercaseMessage.includes('date') || lowercaseMessage.includes('time')) {
         return dirtythirtiesDatabase.eventTimeResponse;
     }
 
-    // Check for questions about the AI bot
+    // Dress code
+    if (lowercaseMessage.includes('dress') || lowercaseMessage.includes('wear') || lowercaseMessage.includes('outfit')) {
+        return dirtythirtiesDatabase.dressCodeResponse;
+    }
+
+    // RSVP
+    if (lowercaseMessage.includes('rsvp') || lowercaseMessage.includes('sign up') || lowercaseMessage.includes('register')) {
+        return dirtythirtiesDatabase.rsvpResponse;
+    }
+
+    // Event features
+    if (lowercaseMessage.includes('what') && (lowercaseMessage.includes('happen') || lowercaseMessage.includes('going on') || lowercaseMessage.includes('activities'))) {
+        return dirtythirtiesDatabase.eventFeaturesResponse;
+    }
+
+    // Birthday persons
+    if (lowercaseMessage.includes('who') && lowercaseMessage.includes('birthday')) {
+        return dirtythirtiesDatabase.birthdayPersonsResponse;
+    }
+
+    // Sponsor
+    if (lowercaseMessage.includes('sponsor')) {
+        return dirtythirtiesDatabase.sponsorResponse;
+    }
+
+    // Partners
+    if (lowercaseMessage.includes('partner') || lowercaseMessage.includes('collaboration')) {
+        return dirtythirtiesDatabase.partnerResponse;
+    }
+
+    // AI identity
     if (lowercaseMessage.includes('who are you') || lowercaseMessage.includes('what are you')) {
         return dirtythirtiesDatabase.aiIdentity;
     }
@@ -97,7 +129,12 @@ function getResponseFromDatabase(userMessage) {
 }
 
 function isMessageRelevant(message) {
-    const relevantTopics = ['party', 'event', 'birthday', 'thirty', '30', 'dirty', 'rsvp', 'date', 'lana', 'kristen', 'plus one', 'bring', 'speed dat', 'where', 'when', 'time', 'dress', 'wear'];
+    const relevantTopics = [
+        'party', 'event', 'birthday', 'thirty', '30', 'dirty', 'rsvp', 'date', 'lana', 'kristen',
+        'plus one', 'bring', 'speed dat', 'where', 'when', 'time', 'dress', 'wear', 'outfit',
+        'sponsor', 'partner', 'collaboration', 'happen', 'going on', 'activities', 'features',
+        'pizza', 'natty', 'raffle', 'creatives', 'fi(re)', 'telos', 'underage', 'overserved'
+    ];
     return relevantTopics.some(topic => message.includes(topic));
 }
 
@@ -130,7 +167,7 @@ ${history.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
 
 user question: "${userMessage}"
 
-give a fun, sassy response to the user's question. don't repeat information from previous messages. keep the focus on the party and the excitement of turning 30. take into account the conversation history to provide context-aware responses. remember, DO NOT ask follow-up questions.`;
+give a non-effusive response to the user's question. don't repeat information from previous messages. keep the focus on the party and the excitement of turning 30. take into account the conversation history to provide context-aware responses. remember, DO NOT ask follow-up questions.`;
 
     try {
         const response = await axios.post(endpoint, {
