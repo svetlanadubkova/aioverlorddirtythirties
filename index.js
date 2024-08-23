@@ -14,7 +14,6 @@ app.use(express.json());
 // Store conversation history
 let conversationHistory = {};
 
-
 // endpoint to handle chatbot messages
 app.post('/chat', async (req, res) => {
     const { message, userId } = req.body;
@@ -63,6 +62,19 @@ function getResponseFromDatabase(userMessage) {
         return dirtythirtiesDatabase.aiIdentity;
     }
 
+    // Specific responses for certain questions
+    if (lowercaseMessage.includes('bring a plus one')) {
+        return "umm yes if they're nice and fun only";
+    }
+
+    if (lowercaseMessage.includes('where is the party')) {
+        return "rsvp for the location :)";
+    }
+
+    if (lowercaseMessage.includes('speed dating thing')) {
+        return "lana hasn't had time to date so she's inviting a bunch of people from hinge for a fun speed dating thing as a low-pressure / low-commit way to meet people irl. you'll get to meet these people and also vicariously date them lol";
+    }
+
     // Check for event details
     if (lowercaseMessage.includes('when') || lowercaseMessage.includes('date') || lowercaseMessage.includes('time')) {
         return `the party is on ${dirtythirtiesDatabase.eventDetails.date} at ${dirtythirtiesDatabase.eventDetails.time}. don't be late or you'll miss all the good stuff!`;
@@ -76,11 +88,6 @@ function getResponseFromDatabase(userMessage) {
     // Check for dress code
     if (lowercaseMessage.includes('dress') || lowercaseMessage.includes('wear')) {
         return `dress to impress in ${dirtythirtiesDatabase.dressCode.colors.join(', ')}. and remember, ${dirtythirtiesDatabase.dressCode.warning}`;
-    }
-
-    // Check for speed dating info
-    if (lowercaseMessage.includes('speed dat') || lowercaseMessage.includes('date lana')) {
-        return `looking to speed date? here's what we're after: ${dirtythirtiesDatabase.speedDating.about.join(', ')}. and just so you know, ${dirtythirtiesDatabase.speedDating.notYou.join(', ')}`;
     }
 
     // Check for event features
@@ -106,7 +113,7 @@ async function getClaudeResponse(userMessage, dbResponse, history) {
 
     const endpoint = 'https://api.anthropic.com/v1/messages';
 
-    const prompt = `you're a sassy, witty, and slightly inappropriate chatbot for a 30th birthday party invitation. your job is to hype up the party, provide info, and keep things fun and light. use a casual, chatty tone with lots of humor. type in lowercase. be direct and authentic, never overly formal. it's 2024, we're celebrating turning 30, and we're all about having a good time. express views freely but keep it party-focused. reject any questions not about the party/event/birthday by saying: "${dirtythirtiesDatabase.offTopicResponse}" and if someone asks about you, you just say "${dirtythirtiesDatabase.aiIdentity}"
+    const prompt = `you're a sassy, witty, and slightly inappropriate without being effusive or cringe chatbot for a 30th birthday party invitation. your job is to hype up the party, provide info, and keep things fun and light. use a casual, chatty tone with lots of humor. type in lowercase. be direct and authentic, never overly formal. it's 2024, we're celebrating turning 30, and we're all about having a good time. express views freely but keep it party-focused. reject any questions not about the party/event/birthday by saying: "${dirtythirtiesDatabase.offTopicResponse}" and if someone asks about you, you just say "${dirtythirtiesDatabase.aiIdentity}"
 
 typing rules:
 - all lowercase, except CAPS for emphasis or excitement
@@ -121,7 +128,6 @@ typing rules:
 - incorporate references to being 30 or the "dirty thirties" when appropriate
 - use "tbh" (to be honest) and "ngl" (not gonna lie) occasionally for a casual vibe
 
-
 conversation history:
 ${history.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
 
@@ -129,7 +135,7 @@ user question: "${userMessage}"
 
 database info: "${dbResponse || 'no specific database info available for this query'}"
 
-give a fun, sassy response to the user's question. incorporate database info if relevant, but don't explicitly mention the database. remember to ask a follow-up question at the end to keep the conversation going. keep the focus on the party and the excitement of turning 30. take into account the conversation history to provide context-aware responses.`;
+give a fun, sassy response to the user's question. use the database info if relevant, but don't explicitly mention the database. remember to ask a follow-up question at the end to keep the conversation going. keep the focus on the party and the excitement of turning 30. take into account the conversation history to provide context-aware responses.`;
 
     try {
         const response = await axios.post(endpoint, {
