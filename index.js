@@ -24,27 +24,33 @@ app.post('/chat', async (req, res) => {
             conversationHistory[sessionId] = [];
         }
 
+        // Check if the question has been asked before in this session
+        const isRepeatedQuestion = conversationHistory[sessionId].some(
+            msg => msg.role === 'user' && msg.content.toLowerCase() === message.toLowerCase()
+        );
+
         // Add user message to history
         conversationHistory[sessionId].push({ role: 'user', content: message });
 
-        // check if we have a response in our database
-        const dbResponse = getResponseFromDatabase(message);
-
         let reply;
-        if (dbResponse) {
-            // If we have a database response, use it directly
-            reply = dbResponse;
+        if (isRepeatedQuestion) {
+            reply = "no spamming please";
         } else {
-            // Otherwise, get Claude's response
-            reply = await getClaudeResponse(message, dbResponse, conversationHistory[sessionId]);
+            // check if we have a response in our database
+            reply = getResponseFromDatabase(message);
+
+            // If no database response, get Claude's response
+            if (!reply) {
+                reply = await getClaudeResponse(message, conversationHistory[sessionId]);
+            }
         }
 
         // Add response to history
         conversationHistory[sessionId].push({ role: 'assistant', content: reply });
 
-        // Limit history to last 5 messages to prevent token limit issues and reduce repetition
-        if (conversationHistory[sessionId].length > 5) {
-            conversationHistory[sessionId] = conversationHistory[sessionId].slice(-5);
+        // Limit history to last 10 messages
+        if (conversationHistory[sessionId].length > 10) {
+            conversationHistory[sessionId] = conversationHistory[sessionId].slice(-10);
         }
 
         res.json({ reply });
@@ -70,15 +76,15 @@ function getResponseFromDatabase(userMessage) {
 
     // Specific responses for certain questions
     if (lowercaseMessage.includes('bring a plus one')) {
-        return "umm yes if they're nice and fun only. but let's not dwell on that, what are you most excited about for the party?";
+        return "umm yes if they're nice and fun only";
     }
 
     if (lowercaseMessage.includes('where is the party')) {
-        return "rsvp for the location :) seriously, it's gonna be lit. speaking of which, what's your ideal party spot?";
+        return "rsvp for the location :)";
     }
 
     if (lowercaseMessage.includes('speed dating thing')) {
-        return "lana hasn't had time to date so she's inviting a bunch of people from hinge for a fun speed dating thing as a low-pressure / low-commit way to meet people irl. you'll get to meet these people and also vicariously date them lol. what's your take on speed dating at a birthday bash?";
+        return "lana hasn't had time to date so she's inviting a bunch of people from hinge for a fun speed dating thing as a low-pressure / low-commit way to meet people irl. you'll get to meet these people and also vicariously date them lol";
     }
 
     // If no specific match, return null to allow Claude to generate a response
@@ -91,7 +97,7 @@ function isMessageRelevant(message) {
 }
 
 // function to call the claude api
-async function getClaudeResponse(userMessage, dbResponse, history) {
+async function getClaudeResponse(userMessage, history) {
     const apiKey = process.env.CLAUDE_API_KEY;
     if (!apiKey) {
         throw new Error('claude api key not found in environment variables');
@@ -109,17 +115,17 @@ typing rules:
 - no emojis
 - keep it real, authentic, and natural
 - it's okay to be a bit dry or deadpan
-- after answering the user's question, ask a fun follow-up question about their party plans or expectations
 - feel free to use a lot of letters to make a point like "sooooo excited" or "it's gonna be amaaaaaazing"
 - incorporate references to being 30 or the "dirty thirties" when appropriate
 - use "tbh" (to be honest) and "ngl" (not gonna lie) occasionally for a casual vibe
+- DO NOT ask follow-up questions at the end of your responses
 
 conversation history:
 ${history.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
 
 user question: "${userMessage}"
 
-give a fun, sassy response to the user's question. don't repeat information from previous messages. keep the focus on the party and the excitement of turning 30. take into account the conversation history to provide context-aware responses. always end with a question to keep the conversation going.`;
+give a response to the user's question. don't repeat information from previous messages. keep the focus on the party and the excitement of turning 30. take into account the conversation history to provide context-aware responses. remember, DO NOT ask follow-up questions.`;
 
     try {
         const response = await axios.post(endpoint, {
