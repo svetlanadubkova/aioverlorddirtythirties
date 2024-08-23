@@ -11,37 +11,43 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Store conversation history
+// Store conversation history (now keyed by session ID)
 let conversationHistory = {};
 
 // endpoint to handle chatbot messages
 app.post('/chat', async (req, res) => {
-    const { message, userId } = req.body;
+    const { message, userId, sessionId } = req.body;
 
     try {
-        // Initialize conversation history for new users
-        if (!conversationHistory[userId]) {
-            conversationHistory[userId] = [];
+        // Initialize or reset conversation history for new sessions
+        if (!sessionId || !conversationHistory[sessionId]) {
+            conversationHistory[sessionId] = [];
         }
 
         // Add user message to history
-        conversationHistory[userId].push({ role: 'user', content: message });
+        conversationHistory[sessionId].push({ role: 'user', content: message });
 
         // check if we have a response in our database
         const dbResponse = getResponseFromDatabase(message);
 
-        // get claude's response
-        const claudeResponse = await getClaudeResponse(message, dbResponse, conversationHistory[userId]);
-
-        // Add Claude's response to history
-        conversationHistory[userId].push({ role: 'assistant', content: claudeResponse });
-
-        // Limit history to last 10 messages to prevent token limit issues
-        if (conversationHistory[userId].length > 10) {
-            conversationHistory[userId] = conversationHistory[userId].slice(-10);
+        let reply;
+        if (dbResponse) {
+            // If we have a database response, use it directly
+            reply = dbResponse;
+        } else {
+            // Otherwise, get Claude's response
+            reply = await getClaudeResponse(message, dbResponse, conversationHistory[sessionId]);
         }
 
-        res.json({ reply: claudeResponse });
+        // Add response to history
+        conversationHistory[sessionId].push({ role: 'assistant', content: reply });
+
+        // Limit history to last 5 messages to prevent token limit issues and reduce repetition
+        if (conversationHistory[sessionId].length > 5) {
+            conversationHistory[sessionId] = conversationHistory[sessionId].slice(-5);
+        }
+
+        res.json({ reply });
     } catch (error) {
         console.error('error:', error.message);
         res.status(500).json({ reply: "having trouble thinking rn. try again later", error: error.message });
@@ -64,39 +70,19 @@ function getResponseFromDatabase(userMessage) {
 
     // Specific responses for certain questions
     if (lowercaseMessage.includes('bring a plus one')) {
-        return "umm yes if they're nice and fun only";
+        return "umm yes if they're nice and fun only. but let's not dwell on that, what are you most excited about for the party?";
     }
 
     if (lowercaseMessage.includes('where is the party')) {
-        return "rsvp for the location :)";
+        return "rsvp for the location :) seriously, it's gonna be lit. speaking of which, what's your ideal party spot?";
     }
 
     if (lowercaseMessage.includes('speed dating thing')) {
-        return "lana hasn't had time to date so she's inviting a bunch of people from hinge for a fun speed dating thing as a low-pressure / low-commit way to meet people irl. you'll get to meet these people and also vicariously date them lol";
+        return "lana hasn't had time to date so she's inviting a bunch of people from hinge for a fun speed dating thing as a low-pressure / low-commit way to meet people irl. you'll get to meet these people and also vicariously date them lol. what's your take on speed dating at a birthday bash?";
     }
 
-    // Check for event details
-    if (lowercaseMessage.includes('when') || lowercaseMessage.includes('date') || lowercaseMessage.includes('time')) {
-        return `the party is on ${dirtythirtiesDatabase.eventDetails.date} at ${dirtythirtiesDatabase.eventDetails.time}. don't be late or you'll miss all the good stuff!`;
-    }
-
-    // Check for RSVP info
-    if (lowercaseMessage.includes('rsvp') || lowercaseMessage.includes('attend') || lowercaseMessage.includes('sign up')) {
-        return `wanna join the fun? rsvp here: ${dirtythirtiesDatabase.eventDetails.rsvpLink}. we promise it'll be worth it!`;
-    }
-
-    // Check for dress code
-    if (lowercaseMessage.includes('dress') || lowercaseMessage.includes('wear')) {
-        return `dress to impress in ${dirtythirtiesDatabase.dressCode.colors.join(', ')}. and remember, ${dirtythirtiesDatabase.dressCode.warning}`;
-    }
-
-    // Check for event features
-    if (lowercaseMessage.includes('what') && lowercaseMessage.includes('happen')) {
-        return `get ready for: ${dirtythirtiesDatabase.eventFeatures.join(', ')}. plus, ${dirtythirtiesDatabase.highlights.join(' ')}`;
-    }
-
-    // If no specific match, return a random party quote
-    return dirtythirtiesDatabase.partyQuotes[Math.floor(Math.random() * dirtythirtiesDatabase.partyQuotes.length)];
+    // If no specific match, return null to allow Claude to generate a response
+    return null;
 }
 
 function isMessageRelevant(message) {
@@ -113,7 +99,7 @@ async function getClaudeResponse(userMessage, dbResponse, history) {
 
     const endpoint = 'https://api.anthropic.com/v1/messages';
 
-    const prompt = `you're a sassy, witty, and slightly inappropriate without being effusive or cringe chatbot for a 30th birthday party invitation. your job is to hype up the party, provide info, and keep things fun and light. use a casual, chatty tone with lots of humor. type in lowercase. be direct and authentic, never overly formal. it's 2024, we're celebrating turning 30, and we're all about having a good time. express views freely but keep it party-focused. reject any questions not about the party/event/birthday by saying: "${dirtythirtiesDatabase.offTopicResponse}" and if someone asks about you, you just say "${dirtythirtiesDatabase.aiIdentity}"
+    const prompt = `you're a sassy, witty, and slightly inappropriate without being effusive or cringe chatbot for a 30th birthday party invitation. your job is to hype up the party, provide info, and keep things fun and light. use a casual, chatty tone with lots of humor. type in lowercase. be direct and authentic, never overly formal. it's 2024, we're celebrating turning 30, and we're all about having a good time. express views freely but keep it party-focused.
 
 typing rules:
 - all lowercase, except CAPS for emphasis or excitement
@@ -133,9 +119,7 @@ ${history.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
 
 user question: "${userMessage}"
 
-database info: "${dbResponse || 'no specific database info available for this query'}"
-
-give a fun, sassy response to the user's question. use the database info if relevant, but don't explicitly mention the database. remember to ask a follow-up question at the end to keep the conversation going. keep the focus on the party and the excitement of turning 30. take into account the conversation history to provide context-aware responses.`;
+give a fun, sassy response to the user's question. don't repeat information from previous messages. keep the focus on the party and the excitement of turning 30. take into account the conversation history to provide context-aware responses. always end with a question to keep the conversation going.`;
 
     try {
         const response = await axios.post(endpoint, {
