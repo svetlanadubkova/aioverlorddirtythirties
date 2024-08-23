@@ -16,7 +16,7 @@ const dirtythirtiesDatabase = {
     eventFeatures: [
         "a creatives on fi(re) launch party",
         "a di fara pizza party",
-        "a speed date lana event (invite only, leads welcome if you know someone who might fit the bill)"
+        "a speed date lana event (invite only, leads welcome if you know someone who might fit the bill)",
         "can you bring a plus one? um maybe. if they're nice and fun"
     ],
     highlights: [
