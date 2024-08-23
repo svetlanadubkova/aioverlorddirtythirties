@@ -64,16 +64,6 @@ app.post('/chat', async (req, res) => {
 function getResponseFromDatabase(userMessage) {
     const lowercaseMessage = userMessage.toLowerCase();
     
-    // Check for off-topic questions
-    if (!isMessageRelevant(lowercaseMessage)) {
-        return dirtythirtiesDatabase.offTopicResponse;
-    }
-
-    // Check for questions about the AI bot
-    if (lowercaseMessage.includes('who are you') || lowercaseMessage.includes('what are you')) {
-        return dirtythirtiesDatabase.aiIdentity;
-    }
-
     // Specific responses for certain questions
     if (lowercaseMessage.includes('bring a plus one')) {
         return dirtythirtiesDatabase.plusOneResponse;
@@ -83,7 +73,7 @@ function getResponseFromDatabase(userMessage) {
         return dirtythirtiesDatabase.partyLocationResponse;
     }
 
-    if (lowercaseMessage.includes('speed dating thing')) {
+    if (lowercaseMessage.includes('speed dating')) {
         return dirtythirtiesDatabase.speedDatingResponse;
     }
 
@@ -92,12 +82,22 @@ function getResponseFromDatabase(userMessage) {
         return dirtythirtiesDatabase.eventTimeResponse;
     }
 
-    // If no specific match, return null to allow Claude to generate a response
-    return null;
+    // Check for questions about the AI bot
+    if (lowercaseMessage.includes('who are you') || lowercaseMessage.includes('what are you')) {
+        return dirtythirtiesDatabase.aiIdentity;
+    }
+
+    // If no specific match but the message is relevant, return null to allow Claude to generate a response
+    if (isMessageRelevant(lowercaseMessage)) {
+        return null;
+    }
+
+    // If the message is not relevant, return the off-topic response
+    return dirtythirtiesDatabase.offTopicResponse;
 }
 
 function isMessageRelevant(message) {
-    const relevantTopics = ['party', 'event', 'birthday', 'thirty', '30', 'dirty', 'rsvp', 'date', 'lana', 'kristen'];
+    const relevantTopics = ['party', 'event', 'birthday', 'thirty', '30', 'dirty', 'rsvp', 'date', 'lana', 'kristen', 'plus one', 'bring', 'speed dat', 'where', 'when', 'time', 'dress', 'wear'];
     return relevantTopics.some(topic => message.includes(topic));
 }
 
@@ -130,7 +130,7 @@ ${history.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
 
 user question: "${userMessage}"
 
-give a non-effusive, no bs response to the user's question. don't repeat information from previous messages. keep the focus on the party and the excitement of turning 30. take into account the conversation history to provide context-aware responses. remember, DO NOT ask follow-up questions.`;
+give a fun, sassy response to the user's question. don't repeat information from previous messages. keep the focus on the party and the excitement of turning 30. take into account the conversation history to provide context-aware responses. remember, DO NOT ask follow-up questions.`;
 
     try {
         const response = await axios.post(endpoint, {
