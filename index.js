@@ -24,7 +24,7 @@ app.post('/chat', async (req, res) => {
             conversationHistory[sessionId] = [];
         }
 
-        // Check if the question has been asked before in this session
+        // Check if the exact same question has been asked before in this session
         const isRepeatedQuestion = conversationHistory[sessionId].some(
             msg => msg.role === 'user' && msg.content.toLowerCase() === message.toLowerCase()
         );
@@ -76,15 +76,20 @@ function getResponseFromDatabase(userMessage) {
 
     // Specific responses for certain questions
     if (lowercaseMessage.includes('bring a plus one')) {
-        return "umm yes if they're nice and fun only";
+        return dirtythirtiesDatabase.plusOneResponse;
     }
 
     if (lowercaseMessage.includes('where is the party')) {
-        return "rsvp for the location :)";
+        return dirtythirtiesDatabase.partyLocationResponse;
     }
 
     if (lowercaseMessage.includes('speed dating thing')) {
-        return "lana hasn't had time to date so she's inviting a bunch of people from hinge for a fun speed dating thing as a low-pressure / low-commit way to meet people irl. you'll get to meet these people and also vicariously date them lol";
+        return dirtythirtiesDatabase.speedDatingResponse;
+    }
+
+    // Check for event details
+    if (lowercaseMessage.includes('when') || lowercaseMessage.includes('date') || lowercaseMessage.includes('time')) {
+        return dirtythirtiesDatabase.eventTimeResponse;
     }
 
     // If no specific match, return null to allow Claude to generate a response
@@ -125,7 +130,7 @@ ${history.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
 
 user question: "${userMessage}"
 
-give a response to the user's question. don't repeat information from previous messages. keep the focus on the party and the excitement of turning 30. take into account the conversation history to provide context-aware responses. remember, DO NOT ask follow-up questions.`;
+give a non-effusive, no bs response to the user's question. don't repeat information from previous messages. keep the focus on the party and the excitement of turning 30. take into account the conversation history to provide context-aware responses. remember, DO NOT ask follow-up questions.`;
 
     try {
         const response = await axios.post(endpoint, {

@@ -1,71 +1,32 @@
-const dirtythirtiesDatabase = {
+module.exports = {
+    offTopicResponse: "let's keep it about the party, yeah?",
+    aiIdentity: "i'm just your friendly neighborhood party bot, here to make sure you're hyped for the big 3-0 bash!",
+    plusOneResponse: "umm yes if they're nice and fun only",
+    partyLocationResponse: "rsvp for the location :)",
+    speedDatingResponse: "lana hasn't had time to date so she's inviting a bunch of people from hinge for a fun speed dating thing as a low-pressure / low-commit way to meet people irl. you'll get to meet these people and also vicariously date them lol",
+    eventTimeResponse: "oh snap, you're in for a treat! the big 3-0 bash is going down on saturday, june 15th, 2024. mark your calendars, set those phone reminders, do whatever you gotta do bc this is gonna be one for the books. we're kicking off the dirty thirties in style, so you better be ready to party like it's 1994 (which, let's be real, most of us can't even remember). it's gonna be lit af and you do NOT want to miss out on this epic night of questionable decisions and unparalleled awesomeness.",
     eventDetails: {
-        title: "RUSSIAN SASS MEETS ITALIAN CLASS: LANA & KRISTEN TURN 30",
-        date: "SEPTEMBER 20 2024",
-        time: "7PM",
+        date: "June 15, 2024",
+        time: "7:00 PM",
         rsvpLink: "https://lu.ma/event/evt-LIZKqDTWv3EElMF"
     },
-    sponsors: {
-        main: "underage & overserved",
-        partners: [
-            { name: "Natty Daddy", url: "https://www.nattydaddy.com" },
-            { name: "Creatives on Fi(re)", url: "https://www.investingforfreaks.com" },
-            { name: "Telos Haus", url: "https://telos.haus" }
-        ]
-    },
-    eventFeatures: [
-        "a creatives on fi(re) launch party",
-        "a di fara pizza party",
-        "a speed date lana event (invite only, leads welcome if you know someone who might fit the bill)",
-        "can you bring a plus one? um maybe. if they're nice and fun"
-    ],
-    highlights: [
-        "there will be natty daddies!",
-        "there will be pizza!",
-        "there will be a raffle giveaway!",
-        "and some other fun stuff maybe!"
-    ],
     dressCode: {
         colors: ["red", "gold", "black"],
         warning: "failure to adhere to the dress code will result in secret strict consequences - consider this your warning!"
     },
-    speedDating: {
-        about: [
-            "charismatic and playful: you keep things light!",
-            "passionate: you are easily excitable, loving and open, opinionated (but still keep things light!) & you might even be persona non grata in one circle or another",
-            "thoughtful and high agency",
-            "you know that nothing in this life is personal and you try to love thy neighbor not thy in group",
-            "probably a freelancer or entrepreneurial type",
-            "weirdos, technofascists, & transhumanists welcome",
-            "financially stable!!!"
-        ],
-        notYou: [
-            "no moody and serious brooding types please",
-            "no normies please",
-            "no marxists or socialists please",
-            "no overly sarcastic or irony-poisoned types please"
-        ]
-    },
-    lanasWebsites: [
-        "manhattaneventphotography.com",
-        "manhattanpartyphotographer.com",
-        "brooklynpartyphotographer.com",
-        "underageandoverserved.com",
-        "investingforfreaks.com",
-        "nyceventplanner.xyz",
-        "nycphotoassistant.com",
-        "hirenycphotoassistants.com",
-        "brooklyneventphotographer.com",
-        "nycpartyphotographer.com",
-        "nycphotographyassistant.com",
-        "newyorkphotoassistant.com"
+    eventFeatures: [
+        "natty daddies",
+        "pizza",
+        "raffle giveaway"
+    ],
+    highlights: [
+        "it's a creatives on fi(re) launch party",
+        "it's a di fara pizza party",
+        "it's a speed date lana event (invite only, leads welcome)"
     ],
     partyQuotes: [
-        "this only happens once. well, for kristen it happens twice.",
-        "we're inviting all of the best people we know. and you ;)",
-    ],
-    offTopicResponse: "no spamming please",
-    aiIdentity: "I am your AI overlord. Memento Mori."
+        "turning 30 is like entering a new level in the game of life, except now you have to adult harder",
+        "dirty thirty: because your 20s were just a warm-up",
+        "30 is the new 20, but with better wine and worse hangovers"
+    ]
 };
-
-module.exports = dirtythirtiesDatabase;
