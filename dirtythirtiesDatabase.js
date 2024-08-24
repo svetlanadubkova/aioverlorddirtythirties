@@ -1,6 +1,6 @@
 module.exports = {
     offTopicResponse: "let's keep it about the party, yeah?",
-    aiIdentity: "i'm just your friendly neighborhood party bot, here to make sure you're hyped for the big 3-0 bash!",
+    aiIdentity: "your ai overlord. memento mori",
     plusOneResponse: "umm yes if they're nice and fun only",
     partyLocationResponse: "rsvp for the location :)",
     speedDatingResponse: "lana hasn't had time to date so she's inviting a bunch of people from hinge for a fun speed dating thing as a low-pressure / low-commit way to meet people irl. you'll get to meet these people and also vicariously date them lol",
