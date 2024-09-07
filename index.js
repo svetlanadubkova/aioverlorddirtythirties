@@ -166,6 +166,8 @@ Party Features:
 - There will be pizza
 - Raffle giveaway
 - Other fun surprises
+-Bringing anything is absolutely not required. If you insist, a cheap bottle of wine or something you'd drink.
+
 
 Dress Code:
 - Colors: Red, gold, or black

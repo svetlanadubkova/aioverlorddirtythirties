@@ -40,5 +40,8 @@ module.exports = {
     partyQuotes: [
         "those who were seen dancing were considered insane by those who could not hear the music.",
         "memento mori"
+    ],
+    canguestsbringthings: [
+        "Absolutely not required. If you insist, a cheap bottle of wine or something you’d drink."
     ]
 };
